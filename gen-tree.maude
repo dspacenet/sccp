@@ -1,0 +1,56 @@
+  load list-cons.maude
+  
+  fmod GEN-TREE{X :: TRIV} is
+    protecting LIST-CONS{X} .
+
+    sorts Tree{X} Forest{X} .
+
+    ***(
+      It is better to have sorts distinguishing between empty and non-empty
+      forest. The reason is that it can help in defining the functions on
+      the data types in a clearer way.
+    ***)  
+    op _[_] : X$Elt Forest{X} -> Tree{X} [ctor] .
+    op empty-forest : -> Forest{X} [ctor] .
+    op _:_ : Tree{X} Forest{X} -> Forest{X} [ctor] .
+
+    op root : Tree{X} -> X$Elt .
+    op children : Tree{X} -> Forest{X} .
+    op #children : Tree{X} -> Nat .
+    op length : Forest{X} -> Nat .
+    op leaf? : Tree{X} -> Bool .
+    
+    var E : X$Elt .
+    var T : Tree{X} .
+    var F : Forest{X} .
+
+    eq root(E [F]) = E .
+    eq children(E [F]) = F .
+    
+    eq length(empty-forest) = 0 .
+    eq length(T : F) = 1 + length(F) .
+    eq #children(E [F]) = length(F) .
+    eq leaf?(T) = #children(T) == 0 .
+
+    ops depth degree : Tree{X} -> Nat .
+    ops depth-forest degree-forest : Forest{X} -> Nat .
+    
+    eq depth(E [F]) = 1 + depth-forest(F) .
+    eq depth-forest(empty-forest) = 0 .
+    eq depth-forest(T : F) = max(depth(T), depth-forest(F)) .
+    
+    eq degree(E [F]) = max(length(F), degree-forest(F)) .
+    eq degree-forest(empty-forest) = 0 .
+    eq degree-forest(T : F) = max(degree(T), degree-forest(F)) .
+
+    ops preorder postorder : Tree{X} -> List{X} .
+    ops preorder-forest postorder-forest : Forest{X} -> List{X} .
+ 
+    eq preorder(E [F]) = E : preorder-forest(F) .
+    eq preorder-forest(empty-forest) = [] .
+    eq preorder-forest(T : F) = preorder(T) ++ preorder-forest(F) .
+    
+    eq postorder(E [F]) = postorder-forest(F) ++ (E : []) .
+    eq postorder-forest(empty-forest) = [] .
+    eq postorder-forest(T : F) = postorder(T) ++ postorder-forest(F) .
+  endfm

@@ -1,0 +1,59 @@
+fmod CONSTRAINT is
+    sort Constraint .
+    ops tt a b c d : -> Constraint .
+endfm
+
+fmod COLLATZ is
+    protecting NAT .
+    op f(_) : Nat -> Nat .
+    op T(_,_) : Nat Nat  -> Nat .
+    vars N M : Nat .
+
+    eq f(1) = 1 .
+    ceq f(N) =  f(N quo 2)  if 2 divides N .
+    ceq f(N) =  f((3 * N) + 1) if not(2 divides N) .
+
+    ceq T(N , M) = T(N + 1 , M) if f(N) = 1 /\ N < M .
+    ceq T(N , M) = 0  if f(N) =/= 1 .
+    ceq T(N , M) = 1  if f(N) = 1 /\ N >= M .
+endfm
+    
+view Constraint from TRIV to CONSTRAINT is
+    sort Elt to Constraint .
+endv
+
+fmod SET-CONSTRAINT is
+    protecting SET{Constraint} .
+endfm
+
+fmod Process is
+    sort Process .
+    protecting SET-CONSTRAINT .
+
+    op skip : -> Process [ctor ] .
+    op tell : Constraint Process -> Process [ctor] .
+    op ask : Constraint Process -> Process [ctor] .
+    ---op tell : Constraint Process  -> Process [ctor] .
+    op _|_ : Process Process -> Process [ctor assoc comm id: skip] .
+
+    sort Conf .
+    op <_;_> : Process NeSet{Constraint} -> Conf [ctor] .
+
+    vars P Q : Process .
+    vars x y : Constraint .
+    var S : NeSet{Constraint} .
+    
+    eq < (P | tell(x,Q)) ; S > = < P ; (S , x) > [label tell] .
+    
+     ceq   < P | ask(x, Q) ; S > = < P | Q ; S > if x in S [label ask] .
+     ---eq < (P | tell(x)) ; S > = < P ; (S , x) > [label tell] .
+
+endfm
+red in COLLATZ :  f(2) .
+---eof
+---red ( < tell(c) | ask(c, tell(d)) ; tt > ) .
+---red ( <  ask(c, tell(d)) | tell(c) ; tt > ) .
+
+
+---red ( < ask(tt, tell(b)) | ask(b, tell(a)) | ask(a, tell(c)) ; tt > ) .
+---red ( < ask(b, tell(a)) | ask(a, tell(c)) | ask(tt, tell(b)) ; tt > ) .

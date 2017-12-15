@@ -1,0 +1,17 @@
+
+fmod COLLATZ is
+    protecting NAT .
+    op f(_) : Nat -> Nat .
+    op T(_,_) : Nat Nat  -> Nat .
+    vars N M : Nat .
+
+    eq f(1) = 1 .
+    ceq f(N) =  f(N quo 2)  if 2 divides N .
+    eq f(N) =  f((3 * N) + 1) [owise] .
+
+    ceq T(N , M) = T(N + 1 , M) if f(N) = 1 /\ N < M .
+    ceq T(N , M) = 0  if f(N) =/= 1 .
+    ceq T(N , M) = 1  if f(N) = 1 /\ N >= M .
+endfm
+
+red f(42) .

@@ -1,0 +1,13 @@
+  ---- from the book All About Maude
+  ---- from the Maude Manual
+  ---- by the Maude team
+
+fmod FACTORIAL is
+    protecting NAT .
+    op _! : Nat -> NzNat .
+    var N : Nat .
+    eq 0 ! = 1 .
+    eq (s N) ! = (s N) * N ! .
+endfm
+
+red in FACTORIAL : 10 ! .

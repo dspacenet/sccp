@@ -1,0 +1,46 @@
+fmod CONSTRAINT is
+    sort Constraint .
+    ops tt a b c d : -> Constraint .
+endfm
+
+    
+view Constraint from TRIV to CONSTRAINT is
+    sort Elt to Constraint .
+endv
+
+fmod SET-CONSTRAINT is
+    protecting SET{Constraint} .
+endfm
+
+mod Process is
+    sort Process .
+    protecting SET-CONSTRAINT .
+
+    op skip : -> Process [ctor ] .
+    op tell : Constraint Process -> Process [ctor] .
+    op ask : Constraint Process -> Process [ctor] .
+    ---op tell : Constraint Process  -> Process [ctor] .
+    op _|_ : Process Process -> Process [ctor assoc comm id: skip] .
+
+    sort Conf .
+    op <_;_> : Process NeSet{Constraint} -> Conf [ctor] .
+
+    vars P Q : Process .
+    vars x y : Constraint .
+    var S : NeSet{Constraint} .
+    
+    rl [tell] : 
+     < (P | tell(x,Q)) ; S > => < P ; (S , x) > [label tell] .
+    
+    crl [ask] :
+     < P | ask(x, Q) ; S > => < P | Q ; S > if x in S [label ask] .
+    
+
+endm
+eof
+rew ( < tell(c,skip) | ask(c, tell(d,skip)) ; tt > ) .
+rew ( <  ask(c, tell(d,skip)) | tell(c,skip) ; tt > ) .
+
+
+red ( < ask(tt, tell(b)) | ask(b, tell(a)) | ask(a, tell(c)) ; tt > ) .
+red ( < ask(b, tell(a)) | ask(a, tell(c)) | ask(tt, tell(b)) ; tt > ) .
