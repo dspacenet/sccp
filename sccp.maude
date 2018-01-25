@@ -435,6 +435,8 @@ mod SYNTAX4SOCIALNET is
  op now_then_ : Const SpaInstruc -> SpaInstruc [prec 30] .
  op now_else_ : Const SpaInstruc -> SpaInstruc [prec 30] .
  op say(_) : Const -> SpaInstruc [strat (0) prec 30] .
+ op signal(_) : Const -> SpaInstruc [strat (0) prec 30] .
+ op clock(_) : Const -> SpaInstruc [strat (0) prec 30] .
 
  op kill(_) : String -> SpaInstruc [strat (0) prec 30] .
  op rm(_,_,_) : Pattern Pattern Pattern -> SpaInstruc [strat (0) prec 30] .
@@ -518,7 +520,7 @@ mod SYNTAX4SOCIALNET is
 
 
 
----todo: remove npost, simplify the above code by allowing kill(pid) to be replaced with the appropiate value for pid, use constants for markers.  
+---todo: remove npost, simplify the above code by allowing kill(pid) to be replaced with the appropiate value for pid, use constants for markers.
 
  eq post(c) = tell(c) .
 
@@ -534,25 +536,28 @@ mod SYNTAX4SOCIALNET is
  eq repeat P = rec 'vrep in ( P ||
                     enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v('vrep) ) .
 
- eq whenever c do P = rec 'vwhenever in ( ask header . c then P || 
+ eq whenever c do P = rec 'vwhenever in ( ask header . c then P ||
                     enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v('vwhenever)) .
 
  eq do P until c = rec 'vuntil in (P || (ask header . c then  enter @ "abattoir" do  tell("<u>" . c))   ||
                     enter @ "abattoir" do unless  kill-proc-cond v ( "<u>" . c)  next exit @ "abattoir" do v('vuntil)) .
 
- eq when c do P = rec 'vwhen in ( ask header . c then ( P || enter @ "abattoir" do tell("<w>" . c) )  || 
-                   enter @ "abattoir" do unless kill-proc-cond v ( "<w>" . c ) next exit @ "abattoir" do  v('vwhen)) .               
+ eq when c do P = rec 'vwhen in ( ask header . c then ( P || enter @ "abattoir" do tell("<w>" . c) )  ||
+                   enter @ "abattoir" do unless kill-proc-cond v ( "<w>" . c ) next exit @ "abattoir" do  v('vwhen)) .
 
- eq while c do P = rec 'vwhile in ( ask header . c then ( P || enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do next v('vwhile) ) 
+ eq while c do P = rec 'vwhile in ( ask header . c then ( P || enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do next v('vwhile) )
                                      ) .
 
  eq now c then P = ask header . c then P .
- 
+
  eq now c else Q =  unless ( (header . c) v kill-proc-cond) next Q .
 
  eq say(c) = tell(c) || next ((enter @ "abattoir" do  tell("<pids|" . *)) || (enter @ "top" do enter @ "abattoir" do  tell("<pids|" . *)) ) .
 
  eq call(X) = enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v(X) .
+ eq signal(c) = enter @ "clock" do (tell(c) || enter @ "abattoir" do  tell(c)) .
+ eq clock(c) = enter @ "clock" do (tell(c) || next enter @ "abattoir" do  tell(c)) .
+
 endm
 
 
@@ -611,7 +616,7 @@ mod MEMORYKILL is
  eq forestkill(T : F, s(N)) = memkill(T) : forestkill(F, N) .
  eq forestkill(C[F1] : F, 0) = empty[F1] : auxforestkill(F)  .
  eq forestkill(empty-forest, N) = empty-forest .
- eq auxforestkill(T : F) = T : auxforestkill(F) .
+ eq auxforestkill(T : F) = memkill(T) : auxforestkill(F) .
  eq auxforestkill(empty-forest) = empty-forest .
 
 
