@@ -446,6 +446,10 @@ mod SYNTAX4SOCIALNET is
  op kill-usn : -> Const .
  op kill-proc-cond : -> Const .
 
+ op clock(_) : String -> SpaInstruc [strat (0) prec 30] .
+ op signal(_) : String ->  SpaInstruc [strat (0) prec 30] .
+ op tick :  -> SpaInstruc  .
+
  op loop : -> SpaInstruc .
  vars P P' Q : SpaInstruc .
  var i : Nat .
@@ -554,10 +558,17 @@ mod SYNTAX4SOCIALNET is
 
  eq say(c) = tell(c) || next ((enter @ "abattoir" do  tell("<pids|" . *)) || (enter @ "top" do enter @ "abattoir" do  tell("<pids|" . *)) ) .
 
- eq call(X) = enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v(X) .
- eq signal(c) = enter @ "clock" do (tell(c) || enter @ "abattoir" do  tell(c)) .
- eq clock(c) = enter @ "clock" do (tell(c) || next enter @ "abattoir" do  tell(c)) .
+ 
+ --- eq signal(s) = tell(s) || rm( * , * , s ) .
 
+ ---eq tick = enter @ "clock" do signal("tick") .
+
+--- eq clock(s) = enter @ "clock" do ( tell(s) || next(rm( * , * , s )) ) .
+
+
+ eq call(X) = enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v(X) .
+ eq signal(c) = tell(c) || enter @ "abattoir" do tell(c) .
+ eq clock(c) = enter @ "clock" do (tell(c) || next enter @  "abattoir" do tell(c)) .
 endm
 
 
