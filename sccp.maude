@@ -1,9 +1,10 @@
 ---------------------------------------------------------
----- SCCP Virtual Machine
+---- SCCP Virtual Machine 
 ---- By: Héctor Delgado, Camilo Rueda and Frank Valencia.
 ---------------------------------------------------------
 
 ---- Module for Naive String Pattern Matching: The string S matches the pattern P iff (S | P) =>* ("" | "").
+--- UPDATES: |  now has type Pattern Pattern -> Pattern. Same for |-.
 
 mod STRING-PATTERN is
  pr STRING .
@@ -22,13 +23,13 @@ mod STRING-PATTERN is
  op _v_ : Pattern Pattern -> Pattern [ctor  assoc comm prec 40] .
  op _&_ : Pattern Pattern -> Pattern [ctor  assoc comm prec 30] .
  op [_]* : Pattern -> Pattern [ctor] .
- op (_|_) : String Pattern -> Comp [ctor] .
+ op (_|_) : Pattern Pattern -> Comp [ctor] .
 
  op isnumber :  -> Pattern .
  op isdigit : -> Pattern .
  op isnonz-digit : -> Pattern .
 
- vars  P P' Q Q' R : Pattern .
+ vars  P P' Q Q' R R' : Pattern .
  vars S S' : String .
 
  ---Defining functions car and cdr (inspired in lisp) but for patterns.
@@ -50,6 +51,8 @@ eq P v P = P .
 
 
 ---Pattern Matching Rules
+  rl [identity]:
+  ( P | P )  =>  ( "" | "" )   .
 
  crl [stringsymbols]:
   ( S | P )  =>  ( strcdr(S) | cdr(P) )
@@ -77,29 +80,29 @@ eq P v P = P .
 
 
  crl [concat]:
-  ( S | P . Q )  => ( S' | Q )
+  ( R | P . Q )  => ( R' | Q )
   if
- S =/= ""  /\   P =/= ""  /\ Q =/= ""  /\  ( S | P )  =>  ( S' | "" )
+ R =/= ""  /\   P =/= ""  /\ Q =/= ""  /\  ( R | P )  =>  ( R' | "" )
   .
 
 
 crl [or]:
-  ( S | (P v Q) )  =>  ( S | P )
+  ( R | (P v Q) )  =>  ( R | P )
   if
- S =/= ""
+ R =/= ""
   .
 
 crl [and]:
-  ( S | (P & Q) )  =>  ( S' | (P' & Q') )
+  ( R | (P & Q) )  =>  ( R' | (P' & Q') )
   if
- S =/= "" /\   P =/= ""  /\ Q =/= "" /\  ( S | P )  =>  ( S' | P' ) /\ ( S | Q )  =>  ( S' | Q' )
+ R =/= "" /\   P =/= ""  /\ Q =/= "" /\  ( R | P )  =>  ( R' | P' ) /\ ( R | Q )  =>  ( R' | Q' )
   .
 
  rl [staroperatorcase0]:
-  ( S | [ P ]* )  =>  ( S |  ""  ) .
+  ( R | [ P ]* )  =>  ( R |  ""  ) .
 
  rl [staroperatorcasen]:
-  ( S | [ P ]* )  =>  ( S |  P . [ P ]*  ) .
+  ( R | [ P ]* )  =>  ( R |  P . [ P ]*  ) .
 
 
  eq isdigit = "0" v isnonz-digit .
@@ -295,10 +298,10 @@ mod STRPAT-DEDUC is
  inc BOOL .
  subsort Bool < Deduc .
 
- var S : String .
+ var S : Pattern .
  var P : Pattern .
 
- op deduc : String Pattern -> Deduc .
+ op deduc : Pattern Pattern -> Deduc .
  op error : -> Deduc .
 
  crl [deduc] :
@@ -311,10 +314,10 @@ mod STRPAT-META is
  inc STRPAT-DEDUC .
 
  var D : Deduc .
- var S : String .
+ var S : Pattern .
  var P : Pattern .
  var x  : Deduc .
- op _|-_ : String Pattern -> Deduc .
+ op _|-_ : Pattern Pattern -> Deduc .
  ---TODO: find out what unbounded is
  ceq S |- P = true if downTerm(getTerm(metaRewrite(upModule('STRPAT-DEDUC, false), upTerm(deduc(S,P)), unbounded)), error) .
  eq S |- P = false [owise] .
@@ -440,7 +443,7 @@ mod SYNTAX4SOCIALNET is
 
  op kill(_) : String -> SpaInstruc [strat (0) prec 30] .
  op rm(_,_,_) : Pattern Pattern Pattern -> SpaInstruc [strat (0) prec 30] .
-
+ op msg(_,_,_) : Pattern Pattern Pattern -> Pattern [strat (0) prec 30] .
  op kill-pid :  -> Const .
  op kill-all : -> Const .
  op kill-usn : -> Const .
@@ -503,12 +506,19 @@ mod SYNTAX4SOCIALNET is
 
  eq kill-proc-cond = kill-pid v kill-usn v kill-all .
 
+ eq  msg(* , * , *) = * . 
+ ceq msg(pid-p , * , *) =  "<" . pid-p . "|" . * if pid-p =/= *  .
+ ceq msg(* , usr-p , *) =  * . "|" . usr-p . ">" . * if usr-p =/= * .
+ ceq msg(* , * , msg-p) = * . ">" . msg-p  if msg-p =/= * .
+ eq  msg(pid-p , usr-p , msg-p) =  "<" . pid-p . "|" . usr-p . ">" . msg-p [owise].
 
- eq rm(* , * , *) =  ( enter @ "abattoir" do tell( * ) ) .
- ceq rm(pid-p , * , *) =  ( enter @ "abattoir" do tell( "<" . pid-p . "|" . * ) ) if pid-p =/= * .
- ceq rm(* , usr-p , *) =  ( enter @ "abattoir" do tell( * . "|" . usr-p . ">" . * ) ) if usr-p =/= * .
- ceq rm(* , * , msg-p) = ( enter @ "abattoir" do tell( * . ">" . msg-p ) ) if msg-p =/= * .
- eq rm(pid-p , usr-p , msg-p) =  ( enter @ "abattoir" do tell( "<" . pid-p . "|" . usr-p . ">" . msg-p ) ) [owise].
+ eq rm(pid-p , usr-p , msg-p) = ( enter @ "abattoir" do tell(msg(pid-p , usr-p , msg-p)) ) .
+
+--- eq rm(* , * , *) =  ( enter @ "abattoir" do tell( * ) ) .
+--- ceq rm(pid-p , * , *) =  ( enter @ "abattoir" do tell( "<" . pid-p . "|" . * ) ) if pid-p =/= * .
+--- ceq rm(* , usr-p , *) =  ( enter @ "abattoir" do tell( * . "|" . usr-p . ">" . * ) ) if usr-p =/= * .
+--- ceq rm(* , * , msg-p) = ( enter @ "abattoir" do tell( * . ">" . msg-p ) ) if msg-p =/= * .
+---  eq rm(pid-p , usr-p , msg-p) =  ( enter @ "abattoir" do tell( "<" . pid-p . "|" . usr-p . ">" . msg-p ) ) [owise].
 ---self-reference issue if we add this: || ( enter @ "top" do enter @ "abattoir" do  tell(....)  ) .
 
  ceq kill(s) =
@@ -528,7 +538,7 @@ mod SYNTAX4SOCIALNET is
 
  eq post(c) = tell(c) .
 
- eq npost(c) = post(c) .
+ eq npost(c) =  (tell(c) || next enter @  "abattoir" do tell(c)) .
 
  eq rpost(c)  = rec 'vpost in ( tell(c) ||
                     enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v('vpost) ) .
@@ -540,24 +550,24 @@ mod SYNTAX4SOCIALNET is
  eq repeat P = rec 'vrep in ( P ||
                     enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v('vrep) ) .
 
- eq whenever c do P = rec 'vwhenever in ( ask header . c then P ||
+ eq whenever c do P = rec 'vwhenever in ( ask  c then P ||
                     enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v('vwhenever)) .
 
- eq do P until c = rec 'vuntil in (P || (ask header . c then  enter @ "abattoir" do  tell("<u>" . c))   ||
+ eq do P until c = rec 'vuntil in (P || (ask c then  enter @ "abattoir" do  tell("<u>" . c))   ||
                     enter @ "abattoir" do unless  kill-proc-cond v ( "<u>" . c)  next exit @ "abattoir" do v('vuntil)) .
 
- eq when c do P = rec 'vwhen in ( ask header . c then ( P || enter @ "abattoir" do tell("<w>" . c) )  ||
+ eq when c do P = rec 'vwhen in ( ask  c then ( P || enter @ "abattoir" do tell("<w>" . c) )  ||
                    enter @ "abattoir" do unless kill-proc-cond v ( "<w>" . c ) next exit @ "abattoir" do  v('vwhen)) .
 
- eq while c do P = rec 'vwhile in ( ask header . c then ( P || enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do next v('vwhile) )
-                                     ) .
+ eq while c do P = rec 'vwhile in ( ask c then ( P || enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do next v('vwhile) )  ) .
 
- eq now c then P = ask header . c then P .
+ eq now c then P = ask  c then P .
 
- eq now c else Q =  unless ( (header . c) v kill-proc-cond) next Q .
+ eq now c else Q =  unless ( c v kill-proc-cond) next Q .
 
- eq say(c) = tell(c) || next ((enter @ "abattoir" do  tell("<pids|" . *)) || (enter @ "top" do enter @ "abattoir" do  tell("<pids|" . *)) ) .
+--- eq say(c) = tell(c) || next ((enter @ "abattoir" do  tell("<pids|" . *)) || (enter @ "top" do enter @ "abattoir" do  tell("<pids|" . *)) ) .
 
+ eq say(c) =  tell(c) || next enter @ "abattoir" do tell(c) .
  
  --- eq signal(s) = tell(s) || rm( * , * , s ) .
 
@@ -567,7 +577,11 @@ mod SYNTAX4SOCIALNET is
 
 
  eq call(X) = enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v(X) .
+
  eq signal(c) = tell(c) || enter @ "abattoir" do tell(c) .
+
+--- this doesnot work. why ?  eq signal(c) = tell(c) ||  enter @ "abattoir" do next tell(c) .
+
  eq clock(c) = enter @ "clock" do (tell(c) || next enter @  "abattoir" do tell(c)) .
 endm
 
