@@ -459,6 +459,7 @@ mod SYNTAX4SOCIALNET is
  var c : Const .
  var X : Qid .
  vars agent s : String .
+ 
 
  vars pid-p usr-p msg-p : Pattern .
 
@@ -565,9 +566,9 @@ mod SYNTAX4SOCIALNET is
 
  eq now c else Q =  unless ( c v kill-proc-cond) next Q .
 
---- eq say(c) = tell(c) || next ((enter @ "abattoir" do  tell("<pids|" . *)) || (enter @ "top" do enter @ "abattoir" do  tell("<pids|" . *)) ) .
-
- eq say(c) =  tell(c) || next enter @ "abattoir" do tell(c) .
+ ---eq say(c) = tell(c) || next ((enter @ "abattoir" do  tell("<pids|" . *)) || (enter @ "top" do enter @ "abattoir" do  tell("<pids|" . *)) ) .
+ var  sc : Const .
+ eq say(sc) = tell("<pids|s|usn>"+sc) || ask * . "s|usn>"+sc then next enter @ "abattoir" do tell(* . "s|usn>"+sc) .
  
  --- eq signal(s) = tell(s) || rm( * , * , s ) .
 
