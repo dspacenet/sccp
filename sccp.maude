@@ -592,13 +592,18 @@ mod SYNTAX4SOCIALNET is
 
  eq do P until c = rec 'vuntil in (P || (ask c then  enter @ "abattoir" do  tell("<u>" . c))   ||
                     enter @ "abattoir" do unless  kill-proc-cond v ( "<u>" . c)  next exit @ "abattoir" do v('vuntil)) .
-
+***(
  eq when c do P = rec 'vwhen in ( ask  c then ( P || enter @ "abattoir" do tell("<w>" . c) )  ||
                    enter @ "abattoir" do unless kill-proc-cond v ( "<w>" . c ) next exit @ "abattoir" do  v('vwhen)) .
+)***
 
+ eq when c do P = rec 'vwhen in ( ask c then (P || s(tell("<w>" . c),@ "abattoir")) || 
+                  s(unless kill-proc-cond v ("<w>" . c) next x(v('vwhen) ,@ "abattoir"), @ "abattoir")) .
+
+ 
  eq while c do P = rec 'vwhile in ( ask c then ( P || enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do next v('vwhile) )  ) .
 
- eq now c then P = ask  c then P .
+ eq now c then P = ask c then P .
 
  eq now c else Q =  unless ( c v kill-proc-cond) next Q .
 
@@ -616,7 +621,8 @@ mod SYNTAX4SOCIALNET is
 
  eq call(X) = enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v(X) .
 
- eq signal(c) = tell(c) || enter @ "abattoir" do tell(c) .
+--- eq signal(c) = tell(c) || enter @ "abattoir" do tell(c) .
+ eq signal(c) = tell(c) || s(tell(c),@ "abattoir") .
 
 --- this doesnot work. why ?  eq signal(c) = tell(c) ||  enter @ "abattoir" do next tell(c) .
 
