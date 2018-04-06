@@ -461,7 +461,7 @@ mod SYNTAX4SOCIALNET is
  var i : Nat .
  var c : Const .
  var X : Qid .
- vars agent s : String .
+ vars agent vstr : String .
  
 
  vars pid-p usr-p msg-p : Pattern .
@@ -548,15 +548,15 @@ mod SYNTAX4SOCIALNET is
   ( enter @ "top" do enter @ "abattoir" do  (tell(kill-all) || tell( * )  ) ) if s = "all" .
 ***)
 
- ceq kill(s) =
+ ceq kill(vstr) =
   s( tell(kill-all) || tell( * )  , @ "abattoir" ) ||
-  s(s(  tell(kill-all) || tell( * )  ,  @ "abattoir"    )   , @ "top") if s = "all" .
+  s(s(  tell(kill-all) || tell( * )  ,  @ "abattoir"    )   , @ "top") if vstr = "all" .
 
 
 
- eq kill(s) = 
-   s( tell("<" + s + "|") || tell( "|" + s + ">" )  ||  tell( "<" . s . "|" . * ) || tell( "<" . * . "|" . s . ">" . * )  , @ "abattoir" ) ||
- s(s( tell("<" + s + "|") || tell( "|" + s + ">" )  ||  tell( "<" . s . "|" . * ) || tell( "<" . * . "|" . s . ">" . * )  ,  @ "abattoir")  , @ "top")  [owise] .
+ eq kill(vstr) = 
+   s( tell("<" + vstr + "|") || tell( "|" + vstr + ">" )  ||  tell( "<" . vstr . "|" . * ) || tell( "<" . * . "|" . vstr . ">" . * )  , @ "abattoir" ) ||
+ s(s( tell("<" + vstr + "|") || tell( "|" + vstr + ">" )  ||  tell( "<" . vstr . "|" . * ) || tell( "<" . * . "|" . vstr . ">" . * )  ,  @ "abattoir")  , @ "top")  [owise] .
 
 
 
