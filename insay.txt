@@ -1,0 +1,1 @@
+red in NTCC-RUN : IO(< s(s(tell(* . "s|hectordavid1228>" . "IMPORTANT2"), 4) || rec 'vrep in (tell("<pids|s|hectordavid1228>IMPORTANT2") || ask * . "|s|hectordavid1228>" . "IMPORTANT2" then next s(tell(* . "s|hectordavid1228>" . "IMPORTANT2"), 4) || s(unless "<58119|" v "{k:a}" v "|hectordavid1228>" next x(v('vrep), 4), 4)), 1) ; empty[empty-forest]>) .

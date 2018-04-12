@@ -1,0 +1,2 @@
+rew in SCCP-RUN : < s(x(rec 'vrep in (tell("<pids|s|usn>lala") || ask * .
+    "|s|usn>" . "lala" then next s(tell(* . "s|usn>" . "lala"), 4) || s(unless "<pid|" v "{k:a}" v "|usn>" next x(v('vrep), 4), 4)), 4), 4) ; empty[empty-forest]> .
