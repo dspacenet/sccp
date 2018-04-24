@@ -456,12 +456,13 @@ mod SYNTAX4SOCIALNET is
  op signal(_) : String ->  SpaInstruc [strat (0) prec 30] .
  op tick :  -> SpaInstruc  .
 
+
  op loop : -> SpaInstruc .
  vars P P' Q : SpaInstruc .
  var i : Nat .
  var c : Const .
  var X : Qid .
- vars agent vstr : String .
+ vars agent vstr  : String .
  
 
  vars pid-p usr-p msg-p : Pattern .
@@ -505,7 +506,7 @@ mod SYNTAX4SOCIALNET is
  ceq @ agent = 4 if agent = "abattoir" .
  ceq @ agent = 6 if agent = "clock" .
  ceq @ agent = 8 if agent = "pbox" . 
-
+ ceq @ agent = 10 if agent = "poll" .
 ---  pbox permission box.
 
 --- error : check this use of [owise] .
@@ -642,6 +643,21 @@ eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
 
 --- eq clock(c) = enter @ "clock" do (tell(c) || next enter @  "abattoir" do tell(c)) .
  eq clock(c) = s(tell(c) || next s(tell(c),@ "abattoir"),@ "clock") .
+
+***( Poll equations
+ - "o" means the poll is open
+ - the subspace "admin" of space "poll" is used to indicate if the poll is "o"pen.
+ - the poll question is labeled with the the prefix "Q:".
+***)
+ op vote(_) : String -> SpaInstruc [strat (0) prec 30] .
+ op close-poll :  -> SpaInstruc  .
+ op create-poll(_) : String  -> SpaInstruc  .
+ vars choice question : String .
+ 
+ eq vote(choice) = s( s(ask * then x(tell(choice), @ "admin"), @ "admin"), @ "poll")  .
+ eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") || next tell("Q:" + question)  , @ "poll" ) .
+ eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .    
+
 
 endm
 
