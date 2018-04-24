@@ -118,11 +118,20 @@ load gen-tree.maude
 
 ----Module that define the type of the constraints.
 mod CONST is
+ pr META-LEVEL .
  pr STRING .
- sort Const .
+ pr BOOL .
  pr STRING-PATTERN .
+ 
+ sort Const .
  subsort Pattern < Const .
 
+ op _|-_ : String Pattern -> Bool .
+
+ var S : String .
+ var P : Pattern .
+ 
+ eq S |- P = metaSearch(upModule('STRING-PATTERN, false), upTerm((S | P)), upTerm(("" | "")), nil, '*, unbounded, 0) =/= failure .
 endm
 ----------------
 
@@ -175,6 +184,7 @@ mod CLOUD is
  var C : Cloud .
  vars N1 NC1 : Int .
  var i : Nat .
+vars M O : Int .
 
  ---NF: New Forest, OF: Old Forest
  ---Auxiliar functions
@@ -190,8 +200,7 @@ mod CLOUD is
 
  eq expandforest(OF,NF,0) = mergeforest(OF,NF) .
  eq expandforest(OF,NF,s(N1)) = expandforest(OF,empty[empty-forest] : NF,N1) .
- ceq howmanychildren(N1,NC1) = 0 if NC1 > N1 .
- eq howmanychildren(N1,NC1) = (N1 - NC1) + 1 .
+ eq howmanychildren(M,O) = max(0, (M - O) + 1) .
  eq auxreplace(tc,t,N1) = replace(expandforest(children(tc),empty-forest,howmanychildren(N1,#children(tc))),t,N1) .
  eq find(t : T, 0) = t .
  eq find(t : T, s(N1)) = find(T,N1) .
@@ -292,37 +301,7 @@ mod SCCP-SYMBOLS is
 endm
 --------
 
-mod STRPAT-DEDUC is
- inc STRING-PATTERN .
- sort Deduc .
- inc BOOL .
- subsort Bool < Deduc .
 
- var S : Pattern .
- var P : Pattern .
-
- op deduc : Pattern Pattern -> Deduc .
- op error : -> Deduc .
-
- crl [deduc] :
-  deduc(S,P) => true if
-  ( S | P ) => ( "" | "" ) .
-endm
-
-mod STRPAT-META is
- pr META-LEVEL .
- inc STRPAT-DEDUC .
-
- var D : Deduc .
- var S : Pattern .
- var P : Pattern .
- var x  : Deduc .
- op _|-_ : Pattern Pattern -> Deduc .
- ---TODO: find out what unbounded is
- ceq S |- P = true if downTerm(getTerm(metaRewrite(upModule('STRPAT-DEDUC, false), upTerm(deduc(S,P)), unbounded)), error) .
- eq S |- P = false [owise] .
-
-endm
 
 ---red in STRPAT-META : "234543234567876543765433345672345e" |- number .
 
@@ -330,9 +309,7 @@ endm
 
 ---Module that defines the operational semantics of the language.
 mod SCCP is
- pr STRPAT-META .
  inc SCCP-SYMBOLS .
- pr STRING-PATTERN .
  pr CONST .
 
  var c : Const .
@@ -408,6 +385,7 @@ mod SCCP is
 
 endm
 --------
+
 
  ---Derived Operators & User Language For Social Networking .
 
@@ -665,7 +643,7 @@ endm
 
 mod NTCCPLUS+ is
  inc SCCP-SYMBOLS .
- pr STRPAT-META .
+ pr CONST .
 
  op f : SpaInstruc Cloud -> SpaInstruc .
 
@@ -694,7 +672,7 @@ endm
 
 mod MEMORYKILL is
  inc SCCP-SYMBOLS .
- inc STRPAT-META .
+ inc CONST .
  inc SYNTAX4SOCIALNET .
  op memkill : Cloud -> Cloud .
  op auxmemkill : ConstSet ConstSet -> ConstSet .
