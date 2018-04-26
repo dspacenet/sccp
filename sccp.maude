@@ -634,9 +634,12 @@ eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
  op create-poll(_) : String  -> SpaInstruc  .
  vars choice question : String .
  
- eq vote(choice) = s( s(ask * then x(tell(choice), @ "admin"), @ "admin"), @ "poll")  .
- eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") || next tell("Q:" + question)  , @ "poll" ) .
- eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .    
+ eq vote(choice) = s( s(ask * then x(s( ask * then (rm(* , * , *) || x(tell(choice) , @ "usn")), @ "usn" ), @ "admin"), @ "admin"), @ "poll")  .
+ eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") ||
+ 			   || s(tell("o") , 1 ) || s(tell("o") , 3 ) || s(tell("o") , 5 ) || s(tell("o") , 7 ) || s(tell("o") , 9 ) || s(tell("o") , 11 ) 
+                           || s(tell("o") , 13 ) || s(tell("o") , 15 ) || s(tell("o") , 17 ) || s(tell("o") , 19) || s(tell("o") , 21 ) || s(tell("o") , 23 )
+			   || next tell("Q:" + question)  , @ "poll" ) .
+ eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .     
 
 
 endm
