@@ -117,6 +117,7 @@ endm
 load gen-tree.maude
 
 ----Module that define the type of the constraints.
+***()
 mod CONST is
  pr META-LEVEL .
  pr STRING .
@@ -133,6 +134,7 @@ mod CONST is
  
  eq S |- P = metaSearch(upModule('STRING-PATTERN, false), upTerm((S | P)), upTerm(("" | "")), nil, '*, unbounded, 0) =/= failure .
 endm
+
 ----------------
 
 
@@ -148,8 +150,7 @@ endv
 
 ----Module that implements the store as a gen-tree of sets of constraints.
 mod CLOUD is
----??BOOL??
- pr BOOL .
+
  sort Cloud .
  pr INT .
  pr CONST .
@@ -173,7 +174,7 @@ mod CLOUD is
  op lastelement : ForestConstSet -> TreeConstSet .
  op mergeforest : ForestConstSet ForestConstSet -> ForestConstSet .
  op expandforest : ForestConstSet ForestConstSet Nat -> ForestConstSet .
- op howmanychildren : Int Int -> Int .
+ op neededchildren : Nat Nat -> Nat .
  op auxreplace : TreeConstSet TreeConstSet Int -> ForestConstSet .
  ---
 
@@ -184,7 +185,7 @@ mod CLOUD is
  var C : Cloud .
  vars N1 NC1 : Int .
  var i : Nat .
-vars M O : Int .
+ vars M O : Nat .
 
  ---NF: New Forest, OF: Old Forest
  ---Auxiliar functions
@@ -200,16 +201,12 @@ vars M O : Int .
 
  eq expandforest(OF,NF,0) = mergeforest(OF,NF) .
  eq expandforest(OF,NF,s(N1)) = expandforest(OF,empty[empty-forest] : NF,N1) .
----eq howmanychildren(M,O) = max(0,O - M) .
----eq howmanychildren(N1,NC1)
-----= max(0,NC1 - N1) .
-ceq howmanychildren(N1,NC1) = 0 if NC1 > N1 .
- eq howmanychildren(N1,NC1) = (N1 - NC1) + 1 . 
-
-eq auxreplace(tc,t,N1) = replace(expandforest(children(tc),empty-forest,howmanychildren(N1,#children(tc))),t,N1) .
+ ceq neededchildren(M,O) = 0 if O > M .
+ eq neededchildren(M,O) = sd(M,O) + 1 [owise] . 
+ eq auxreplace(tc,t,N1) = replace(expandforest(children(tc),empty-forest,neededchildren(N1,#children(tc))),t,N1) .
  eq find(t : T, 0) = t .
  eq find(t : T, s(N1)) = find(T,N1) .
- eq auxfind(t,N1) = find(expandforest(children(t),empty-forest,howmanychildren(N1,#children(t))),N1) .
+ eq auxfind(t,N1) = find(expandforest(children(t),empty-forest,neededchildren(N1,#children(t))),N1) .
  eq replace(tc : T,t,0) = t : T .
  eq replace(tc : T,t,s(N1)) = tc : replace(T,t,N1) .
  ---
@@ -606,7 +603,7 @@ mod SYNTAX4SOCIALNET is
  
 ***(
    var  sc : String . 
- i  eq say(sc) = tell("<pids|s|usn>" + sc) || ask * . "|s|usn>" . sc then next enter @ "abattoir" do tell(* . "s|usn>" . sc) .
+   eq say(sc) = tell("<pids|s|usn>" + sc) || ask * . "|s|usn>" . sc then next enter @ "abattoir" do tell(* . "s|usn>" . sc) .
 ***)
   
  --- eq signal(s) = tell(s) || rm( * , * , s ) .
@@ -631,21 +628,16 @@ eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
  - "o" means the poll is open
  - the subspace "admin" of space "poll" is used to indicate if the poll is "o"pen.
  - the poll question is labeled with the the prefix "Q:".
-- NOTE: Create poll may need to be updated if new users are added. 
 ***)
  op vote(_) : String -> SpaInstruc [strat (0) prec 30] .
  op close-poll :  -> SpaInstruc  .
  op create-poll(_) : String  -> SpaInstruc  .
  vars choice question : String .
  
- eq vote(choice) = s( s(ask * then x(s( ask * then (rm(* , * , *) || x(tell(choice) , @ "usn")), @ "usn" ), @ "admin"), @ "admin"), @ "poll")  .
- eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") ||
- 			   || s(tell("o") , 1 ) || s(tell("o") , 3 ) || s(tell("o") , 5 ) || s(tell("o") , 7 ) || s(tell("o") , 9 ) || s(tell("o") , 11 ) 
-                           || s(tell("o") , 13 ) || s(tell("o") , 15 ) || s(tell("o") , 17 ) || s(tell("o") , 19) || s(tell("o") , 21 ) || s(tell("o") , 23 )
-			   || next tell("Q:" + question)  , @ "poll" ) .
+ eq vote(choice) = s( s(ask * then x(tell(choice), @ "admin"), @ "admin"), @ "poll")  .
+ eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") || next tell("Q:" + question)  , @ "poll" ) .
  eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .    
 
- eq empty-votes = 
 
 endm
 
