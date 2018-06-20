@@ -127,9 +127,9 @@ mod CONST is
  sort Const .
  subsort Pattern < Const .
 
- op _|-_ : String Pattern -> Bool .
+ op _|-_ : Pattern Pattern -> Bool .
 
- var S : String .
+ var S : Pattern .
  var P : Pattern .
  
  eq S |- P = metaSearch(upModule('STRING-PATTERN, false), upTerm((S | P)), upTerm(("" | "")), nil, '*, unbounded, 0) =/= failure .
@@ -629,16 +629,19 @@ eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
  - the subspace "admin" of space "poll" is used to indicate if the poll is "o"pen.
  - the poll question is labeled with the the prefix "Q:".
 ***)
- op vote(_) : String -> SpaInstruc [strat (0) prec 30] .
+ op vote : String String -> SpaInstruc [strat (0)] .
  op close-poll :  -> SpaInstruc  .
  op create-poll(_) : String  -> SpaInstruc  .
- vars choice question : String .
+ vars choice question varuser : String .
  
- eq vote(choice) = s( s(ask * then x(s( ask * then (rm(* , * , *) || x(tell(choice) , @ "usn")), @ "usn" ), @ "admin"), @ "admin"), @ "poll")  .
+ eq vote(choice,varuser) = s( s(ask * then x(s( ask * then (rm(* , * , *) || 
+ x(tell(choice) , @ varuser)), @ varuser ), @ "admin"), @ "admin"), @ "poll")  .
+
  eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") ||
  			   s(tell("o") , 1 ) || s(tell("o") , 3 ) || s(tell("o") , 5 ) || s(tell("o") , 7 ) || s(tell("o") , 9 ) || s(tell("o") , 11 ) 
                            || s(tell("o") , 13 ) || s(tell("o") , 15 ) || s(tell("o") , 17 ) || s(tell("o") , 19) || s(tell("o") , 21 ) || s(tell("o") , 23 )
 			   || next tell("Q:" + question)  , @ "poll" ) .
+
  eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .     
 
 
