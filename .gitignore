@@ -1,0 +1,4 @@
+*
+!.gitignore
+!*.maude
+!maude.linux64
