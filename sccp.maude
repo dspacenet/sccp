@@ -437,7 +437,7 @@ mod SYNTAX4SOCIALNET is
  op tick :  -> SpaInstruc  .
 
 
- op loop : -> SpaInstruc .
+ op abort : -> SpaInstruc .
  vars P P' Q : SpaInstruc .
  var i : Nat .
  var c : Const .
@@ -474,7 +474,6 @@ mod SYNTAX4SOCIALNET is
 
 --- Table of Agents (note: more effeciently as a hash table)
 ------ users
- ceq @ agent = 0 if agent = "admin" .
  ceq @ agent = 1 if agent = "hector" .
  ceq @ agent = 3 if agent = "frank" .
  ceq @ agent = 5 if agent = "camilo" .
@@ -482,11 +481,15 @@ mod SYNTAX4SOCIALNET is
  ceq @ agent = 9 if agent = "santiago" .
 
 ------ special spaces (top = table of processes, abattoir = contains pids to be killed )
+ ceq @ agent = 0 if agent = "meta" .
  ceq @ agent = 2 if agent = "top" .
  ceq @ agent = 4 if agent = "abattoir" .
  ceq @ agent = 6 if agent = "clock" .
  ceq @ agent = 8 if agent = "pbox" . 
  ceq @ agent = 10 if agent = "poll" .
+ ceq @ agent = 12 if agent = "nbox" .
+ ceq @ agent = 14 if agent = "mailbox" .
+ ceq @ agent = 16 if agent = "pchat" .
 ---  pbox permission box.
 
 --- error : check this use of [owise] .
@@ -494,21 +497,33 @@ mod SYNTAX4SOCIALNET is
 
 ---- end Table of Agents.
 
- eq loop = rec 'x in v('x) .
+eq abort = rec 'x in v('x) .
 
- ---- eq header = "<" .  *   .
+---- eq header = "<" .  *   .
 
- eq kill-all  = "ka" .
- eq kill-pid = "<pid|" .
- eq kill-usn = "|usn>" .
+eq kill-all  = "ka" .
+eq kill-pid = "<pid|" .
+eq kill-usn = "|usn>" .
 
- eq kill-proc-cond = kill-pid v kill-usn v kill-all .
+eq kill-proc-cond = kill-pid v kill-usn v kill-all .
 
- eq  msg(* , * , *) = * . 
- ceq msg(pid-p , * , *) =  "<" . pid-p . "|" . * if pid-p =/= *  .
- ceq msg(* , usr-p , *) =  * . "|" . usr-p . ">" . * if usr-p =/= * .
- ceq msg(* , * , msg-p) = * . ">" . msg-p  if msg-p =/= * .
- eq  msg(pid-p , usr-p , msg-p) =  "<" . pid-p . "|" . usr-p . ">" . msg-p [owise].
+eq  msg(* , * , *) = * . 
+ceq msg(pid-p , * , *) =  "<" . pid-p . "|" . * if pid-p =/= *  .
+ceq msg(* , usr-p , *) =  * . "|" . usr-p . ">" . * if usr-p =/= * .
+ceq msg(* , * , msg-p) = * . ">" . msg-p  if msg-p =/= * .
+eq  msg(pid-p , usr-p , msg-p) =  "<" . pid-p . "|" . usr-p . ">" . msg-p [owise].
+
+op usr:_ : Pattern -> Const .
+eq usr: * = * .
+eq usr: usr-p = "<" . * . "|" . usr-p . ">" . * [owise].
+
+op msg:_ : Pattern -> Const .
+eq msg: * = * .
+eq msg: msg-p = "<" . * . ">" . msg-p [owise].
+
+op pid:_ : Pattern -> Const . 
+eq pid: * = * .
+eq pid: pid-p = "<" . pid-p . "|" . * . ">" . * [owise].
 
 ---  msg( ) may not work if the interface change the message format,@Hector.
 
@@ -629,21 +644,24 @@ eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
  - the subspace "admin" of space "poll" is used to indicate if the poll is "o"pen.
  - the poll question is labeled with the the prefix "Q:".
 ***)
- op vote : String String -> SpaInstruc [strat (0)] .
- op close-poll :  -> SpaInstruc  .
- op create-poll(_) : String  -> SpaInstruc  .
- vars choice question varuser : String .
- 
- eq vote(choice,varuser) = s( s(ask * then x(s( ask * then (rm(* , * , *) || 
- x(tell(choice) , @ varuser)), @ varuser ), @ "admin"), @ "admin"), @ "poll")  .
+op vote : String String -> SpaInstruc [strat (0)] .
+op close-poll :  -> SpaInstruc  .
+op create-poll(_) : String  -> SpaInstruc  .
+vars choice question varuser : String .
 
- eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") ||
- 			   s(tell("o") , 1 ) || s(tell("o") , 3 ) || s(tell("o") , 5 ) || s(tell("o") , 7 ) || s(tell("o") , 9 ) || s(tell("o") , 11 ) 
-                           || s(tell("o") , 13 ) || s(tell("o") , 15 ) || s(tell("o") , 17 ) || s(tell("o") , 19) || s(tell("o") , 21 ) || s(tell("o") , 23 )
-			   || next tell("Q:" + question)  , @ "poll" ) .
+eq vote(choice,varuser) = s( s(ask * then x(s( ask * then (rm(* , * , *) || 
+x(tell(choice) , @ varuser)), @ varuser ), @ "admin"), @ "admin"), @ "poll")  .
 
- eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .     
+eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") ||
+        s(tell("o") , 1 ) || s(tell("o") , 3 ) || s(tell("o") , 5 ) || s(tell("o") , 7 ) || s(tell("o") , 9 ) || s(tell("o") , 11 ) 
+                          || s(tell("o") , 13 ) || s(tell("o") , 15 ) || s(tell("o") , 17 ) || s(tell("o") , 19) || s(tell("o") , 21 ) || s(tell("o") , 23 )
+        || next tell("Q:" + question)  , @ "poll" ) .
 
+eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .     
+
+op notify(_) : String -> SpaInstruc .
+
+eq notify(c) = enter @ "nbox" do post(c) .
 
 endm
 
