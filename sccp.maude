@@ -474,6 +474,7 @@ mod SYNTAX4SOCIALNET is
 
 --- Table of Agents (note: more effeciently as a hash table)
 ------ users
+ ceq @ agent = 0 if agent = "admin" .
  ceq @ agent = 1 if agent = "hector" .
  ceq @ agent = 3 if agent = "frank" .
  ceq @ agent = 5 if agent = "camilo" .
@@ -660,8 +661,10 @@ eq create-poll(question) = s(rm(* , * , *) || s(tell("o"), @ "admin") ||
 eq close-poll =  s( s(rm(* , * , *), @  "admin")  ,  @ "poll") .     
 
 op notify(_) : String -> SpaInstruc .
-
 eq notify(c) = enter @ "nbox" do post(c) .
+
+op mail(_) : String -> SpaInstruc .
+eq mail(c) = enter @ "mailbox" do post(c) .
 
 endm
 
