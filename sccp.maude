@@ -403,7 +403,7 @@ mod SYNTAX4SOCIALNET is
  op _^_ : SpaInstruc Nat -> SpaInstruc [ctor prec 30] .
  op [_]_ : SpaInstruc Nat -> SpaInstruc .
  op xtr : SpaInstruc Nat -> SpaInstruc .
- op call(_) : Qid -> SpaInstruc [ctor] .
+ ---op call(_) : Qid -> SpaInstruc [ctor] .
 
  op npost(_) : Const -> SpaInstruc [strat (0) prec 30] .
  op post(_) : Const -> SpaInstruc [strat (0) prec 30] .
@@ -436,13 +436,15 @@ mod SYNTAX4SOCIALNET is
  op signal(_) : String ->  SpaInstruc [strat (0) prec 30] .
  op tick :  -> SpaInstruc  .
 
+ 
+
 
  op abort : -> SpaInstruc .
  vars P P' Q : SpaInstruc .
  var i : Nat .
  var c : Const .
  var X : Qid .
- vars agent vstr  : String .
+ vars agent vstr pname : String .
  
 
  vars pid-p usr-p msg-p : Pattern .
@@ -480,6 +482,7 @@ mod SYNTAX4SOCIALNET is
  ceq @ agent = 5 if agent = "camilo" .
  ceq @ agent = 7 if agent = "jason" .
  ceq @ agent = 9 if agent = "santiago" .
+ ceq @ agent = 11 if agent = "guest" .
 
 ------ special spaces (top = table of processes, abattoir = contains pids to be killed )
  ceq @ agent = 0 if agent = "meta" .
@@ -491,6 +494,8 @@ mod SYNTAX4SOCIALNET is
  ceq @ agent = 12 if agent = "nbox" .
  ceq @ agent = 14 if agent = "mailbox" .
  ceq @ agent = 16 if agent = "pchat" .
+ ceq @ agent = 18 if agent = "bin" .
+ ceq @ agent = 20 if agent = "tmp" .
 ---  pbox permission box.
 
 --- error : check this use of [owise] .
@@ -630,7 +635,7 @@ eq pid: pid-p = "<" . pid-p . "|" . * . ">" . * [owise].
 
 
 ---eq call(X) = enter @ "abattoir" do unless kill-proc-cond next exit @ "abattoir" do v(X) .
-eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
+---eq call(X) = s(unless kill-proc-cond next x(v(X),@ "abattoir"),@ "abattoir") .
 
 --- eq signal(c) = tell(c) || enter @ "abattoir" do tell(c) .
  eq signal(c) = tell(c) || s(tell(c),@ "abattoir") .
@@ -665,6 +670,12 @@ eq notify(c) = enter @ "nbox" do post(c) .
 
 op mail(_) : String -> SpaInstruc .
 eq mail(c) = enter @ "mailbox" do post(c) .
+
+op def_as_ : String SpaInstruc -> SpaInstruc [prec 30] .
+op call(_) : String -> SpaInstruc [prec 30] .
+
+eq call(pname) = s( signal(pname)  , @ "bin" ) .
+eq def pname as P = s( whenever pname do x(P , @ "bin") , @ "bin") .  
 
 endm
 
