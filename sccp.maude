@@ -48,7 +48,7 @@ mod STRING-PATTERN is
 
 eq P & P = P .
 eq P v P = P .
-
+eq * . * = * .	
 
 ---Pattern Matching Rules
   rl [identity]:
@@ -415,7 +415,7 @@ mod SYNTAX4SOCIALNET is
  op do_until_ : SpaInstruc Const -> SpaInstruc [prec 30] .
  op when_do_ : Const SpaInstruc -> SpaInstruc [prec 30] .
  op while_do_ : Const SpaInstruc -> SpaInstruc [prec 30] .
- op now_then_ : Const SpaInstruc -> SpaInstruc [prec 30] .
+ op if_then_ : Const SpaInstruc -> SpaInstruc [prec 30] .
  op now_else_ : Const SpaInstruc -> SpaInstruc [prec 30] .
  op say(_) : Const -> SpaInstruc [strat (0) prec 30] .
  op signal(_) : Const -> SpaInstruc [strat (0) prec 30] .
@@ -616,7 +616,7 @@ eq pid: pid-p = "<" . pid-p . "|" . * . ">" . * [owise].
  eq while c do P = rec 'vwhile in ( ask c then ( P || 
     s(unless kill-proc-cond next x(next v('vwhile),@ "abattoir"),@ "abattoir"))) .
 
- eq now c then P = ask c then P .
+ eq if c then P = ask c then P .
 
  eq now c else Q =  unless ( c v kill-proc-cond) next Q .
 
