@@ -483,6 +483,10 @@ mod SYNTAX4SOCIALNET is
  ceq @ agent = 7 if agent = "jason" .
  ceq @ agent = 9 if agent = "santiago" .
  ceq @ agent = 11 if agent = "guest" .
+ ceq @ agent = 13 if agent = "jaime" .
+ ceq @ agent = 15 if agent = "giannkarlo" .
+ ceq @ agent = 17 if agent = "alejandro" .
+ ceq @ agent = 19 if agent = "sergio" .
 
 ------ special spaces (top = table of processes, abattoir = contains pids to be killed )
  ceq @ agent = 0 if agent = "meta" .
