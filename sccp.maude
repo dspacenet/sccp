@@ -488,6 +488,15 @@ mod SYNTAX4SOCIALNET is
  ceq @ agent = 17 if agent = "alejandro" .
  ceq @ agent = 19 if agent = "sergio" .
 
+ ----- course groups
+ ceq @ agent = 21 if agent = "group1" .
+ ceq @ agent = 23 if agent = "group2" .
+ ceq @ agent = 25 if agent = "group3" .
+ ceq @ agent = 27 if agent = "group4" .
+ ceq @ agent = 29 if agent = "group5" .
+ ceq @ agent = 31 if agent = "group6" .
+ ceq @ agent = 33 if agent = "group7" .
+
 ------ special spaces (top = table of processes, abattoir = contains pids to be killed )
  ceq @ agent = 0 if agent = "meta" .
  ceq @ agent = 2 if agent = "top" .
